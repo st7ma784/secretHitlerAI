@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler AI - Training Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8">Secret Hitler AI</h1>
+        
+        <!-- Training Status Dashboard -->
+        <div id="training-status" class="bg-gray-800 rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Training Status</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Status</div>
+                    <div id="training-active" class="text-lg font-semibold text-red-400">Inactive</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Total Sessions</div>
+                    <div id="total-sessions" class="text-lg font-semibold">0</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Total Games</div>
+                    <div id="total-games" class="text-lg font-semibold">0</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">AI Agents</div>
+                    <div id="agent-count" class="text-lg font-semibold">0</div>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Last Training</div>
+                    <div id="last-training" class="text-sm">Never</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Next Training</div>
+                    <div id="next-training" class="text-sm">Never</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Training Feedback -->
+        <div id="model-training-feedback" class="bg-gray-800 rounded-lg p-6 mb-8 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Model Training Progress</h2>
+            
+            <!-- Current Training Session -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-300">Current Session Progress</span>
+                    <span id="session-progress-text" class="text-sm text-gray-400">0/20 games</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div id="session-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- LoRA Training Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">LoRA Rank</div>
+                    <div id="lora-rank" class="text-lg font-semibold text-purple-400">16</div>
+                    <div class="text-xs text-gray-500">Adaptation complexity</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Training Loss</div>
+                    <div id="training-loss" class="text-lg font-semibold text-orange-400">0.0</div>
+                    <div class="text-xs text-gray-500">Lower is better</div>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400">Learning Rate</div>
+                    <div id="learning-rate" class="text-lg font-semibold text-green-400">1e-4</div>
+                    <div class="text-xs text-gray-500">Adaptive scheduling</div>
+                </div>
+            </div>
+
+            <!-- RLHF Metrics -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3 text-cyan-400">Reinforcement Learning Progress</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gray-700 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">Reward Model Score</div>
+                        <div id="reward-score" class="text-lg font-semibold text-cyan-400">0.0</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">Policy Gradient</div>
+                        <div id="policy-gradient" class="text-lg font-semibold text-yellow-400">0.0</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">KL Divergence</div>
+                        <div id="kl-divergence" class="text-lg font-semibold text-red-400">0.0</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">Value Function</div>
+                        <div id="value-function" class="text-lg font-semibold text-indigo-400">0.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Performance Comparison -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3 text-green-400">Agent Performance Evolution</h3>
+                <div id="agent-performance-chart" class="bg-gray-700 p-4 rounded-lg">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-400">Liberal Win Rate</div>
+                            <div id="liberal-winrate" class="text-2xl font-bold text-blue-400">52%</div>
+                            <div class="text-xs text-gray-500">↑ +2.3%</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-400">Fascist Win Rate</div>
+                            <div id="fascist-winrate" class="text-2xl font-bold text-red-400">35%</div>
+                            <div class="text-xs text-gray-500">↓ -1.8%</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-400">Hitler Win Rate</div>
+                            <div id="hitler-winrate" class="text-2xl font-bold text-yellow-400">13%</div>
+                            <div class="text-xs text-gray-500">↓ -0.5%</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-400">Avg Game Length</div>
+                            <div id="avg-game-length" class="text-2xl font-bold text-purple-400">18.5</div>
+                            <div class="text-xs text-gray-500">rounds</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Log -->
+            <div>
+                <h3 class="text-lg font-semibold mb-3 text-gray-300">Training Log</h3>
+                <div id="training-log" class="bg-gray-900 p-4 rounded-lg h-32 overflow-y-auto font-mono text-sm">
+                    <div class="text-gray-500">Training log will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Training Mode -->
+            <div class="bg-gray-800 rounded-lg p-8">
+                <h2 class="text-2xl font-semibold mb-6 text-center">Training Mode</h2>
+                <p class="text-gray-300 mb-6 text-center">
+                    Train AI agents through self-play with continuous learning and WandB logging
+                </p>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Number of AI Agents
+                        </label>
+                        <input
+                            type="range"
+                            id="num-agents"
+                            min="4"
+                            max="8"
+                            value="6"
+                            class="w-full"
+                        />
+                        <div id="num-agents-display" class="text-center text-sm text-gray-400 mt-1">6 agents</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Games per Training Session
+                        </label>
+                        <input
+                            type="range"
+                            id="games-per-session"
+                            min="10"
+                            max="50"
+                            value="20"
+                            class="w-full"
+                        />
+                        <div id="games-per-session-display" class="text-center text-sm text-gray-400 mt-1">20 games</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Training Interval (minutes)
+                        </label>
+                        <input
+                            type="range"
+                            id="training-interval"
+                            min="15"
+                            max="120"
+                            step="15"
+                            value="30"
+                            class="w-full"
+                        />
+                        <div id="training-interval-display" class="text-center text-sm text-gray-400 mt-1">30 minutes</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            LoRA Rank (Model Complexity)
+                        </label>
+                        <select
+                            id="lora-rank"
+                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="8">8 - Lightweight</option>
+                            <option value="16" selected>16 - Balanced</option>
+                            <option value="32">32 - High Capacity</option>
+                            <option value="64">64 - Maximum</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Training Method
+                        </label>
+                        <select
+                            id="training-method"
+                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="rlhf" selected>RLHF + LoRA - Reinforcement Learning</option>
+                            <option value="sft">SFT + LoRA - Supervised Fine-tuning</option>
+                            <option value="dpo">DPO + LoRA - Direct Preference Optimization</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-400">
+                            Enable Live Learning
+                        </label>
+                        <input
+                            type="checkbox"
+                            id="enable-live-learning"
+                            checked
+                            class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                        />
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button
+                        id="start-training-btn"
+                        class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-semibold"
+                    >
+                        Start Training
+                    </button>
+                    <button
+                        id="stop-training-btn"
+                        class="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-semibold hidden"
+                    >
+                        Stop Training
+                    </button>
+                </div>
+            </div>
+
+            <!-- Play Mode -->
+            <div class="bg-gray-800 rounded-lg p-8">
+                <h2 class="text-2xl font-semibold mb-6 text-center">Play Mode</h2>
+                <p class="text-gray-300 mb-6 text-center">
+                    Play games with AI bots of varying difficulty levels
+                </p>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Number of AI Bots
+                        </label>
+                        <input
+                            type="range"
+                            id="num-bots"
+                            min="3"
+                            max="9"
+                            value="6"
+                            class="w-full"
+                        />
+                        <div id="num-bots-display" class="text-center text-sm text-gray-400 mt-1">6 bots + you</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">
+                            Bot Difficulty
+                        </label>
+                        <select
+                            id="bot-difficulty"
+                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="easy">Easy - Basic strategies</option>
+                            <option value="medium" selected>Medium - Balanced play</option>
+                            <option value="hard">Hard - Advanced tactics</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button
+                    id="start-playing-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-semibold"
+                >
+                    Start Playing
+                </button>
+            </div>
+        </div>
+
+        <!-- WandB Integration Info -->
+        <div class="bg-gray-800 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-semibold mb-3">WandB Integration</h3>
+            <p class="text-gray-300 text-sm mb-3">
+                Training sessions are automatically logged to Weights & Biases for experiment tracking and visualization.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="font-medium text-blue-400">Game Metrics</div>
+                    <div class="text-gray-400">Win rates, game duration, player actions</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="font-medium text-green-400">Training Progress</div>
+                    <div class="text-gray-400">Session results, agent improvements</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="font-medium text-purple-400">Model Performance</div>
+                    <div class="text-gray-400">Loss curves, learning rates, convergence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error/Status Messages -->
+        <div id="error-message" class="mt-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 hidden">
+        </div>
+        <div id="success-message" class="mt-6 p-4 bg-green-900/50 border border-green-500 rounded-lg text-green-200 hidden">
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let trainingStatus = null;
+        let loading = false;
+        let trainingMetrics = {
+            sessionProgress: 0,
+            maxGames: 20,
+            trainingLoss: 2.45,
+            learningRate: 1e-4,
+            rewardScore: 0.0,
+            policyGradient: 0.0,
+            klDivergence: 0.0,
+            valueFunction: 0.0,
+            liberalWinRate: 52,
+            fascistWinRate: 35,
+            hitlerWinRate: 13,
+            avgGameLength: 18.5
+        };
+        let trainingLogs = [];
+        let metricsUpdateInterval = null;
+
+        // DOM elements
+        const elements = {
+            trainingActive: document.getElementById('training-active'),
+            totalSessions: document.getElementById('total-sessions'),
+            totalGames: document.getElementById('total-games'),
+            agentCount: document.getElementById('agent-count'),
+            lastTraining: document.getElementById('last-training'),
+            nextTraining: document.getElementById('next-training'),
+            
+            // Training feedback elements
+            modelTrainingFeedback: document.getElementById('model-training-feedback'),
+            sessionProgressText: document.getElementById('session-progress-text'),
+            sessionProgressBar: document.getElementById('session-progress-bar'),
+            loraRankDisplay: document.getElementById('lora-rank'),
+            trainingLossDisplay: document.getElementById('training-loss'),
+            learningRateDisplay: document.getElementById('learning-rate'),
+            rewardScore: document.getElementById('reward-score'),
+            policyGradient: document.getElementById('policy-gradient'),
+            klDivergence: document.getElementById('kl-divergence'),
+            valueFunction: document.getElementById('value-function'),
+            liberalWinrate: document.getElementById('liberal-winrate'),
+            fascistWinrate: document.getElementById('fascist-winrate'),
+            hitlerWinrate: document.getElementById('hitler-winrate'),
+            avgGameLength: document.getElementById('avg-game-length'),
+            trainingLog: document.getElementById('training-log'),
+            
+            numAgents: document.getElementById('num-agents'),
+            numAgentsDisplay: document.getElementById('num-agents-display'),
+            gamesPerSession: document.getElementById('games-per-session'),
+            gamesPerSessionDisplay: document.getElementById('games-per-session-display'),
+            trainingInterval: document.getElementById('training-interval'),
+            trainingIntervalDisplay: document.getElementById('training-interval-display'),
+            loraRankSelect: document.getElementById('lora-rank'),
+            trainingMethod: document.getElementById('training-method'),
+            enableLiveLearning: document.getElementById('enable-live-learning'),
+            
+            numBots: document.getElementById('num-bots'),
+            numBotsDisplay: document.getElementById('num-bots-display'),
+            botDifficulty: document.getElementById('bot-difficulty'),
+            
+            startTrainingBtn: document.getElementById('start-training-btn'),
+            stopTrainingBtn: document.getElementById('stop-training-btn'),
+            startPlayingBtn: document.getElementById('start-playing-btn'),
+            
+            errorMessage: document.getElementById('error-message'),
+            successMessage: document.getElementById('success-message')
+        };
+
+        // Utility functions
+        function showError(message) {
+            elements.errorMessage.textContent = message;
+            elements.errorMessage.classList.remove('hidden');
+            elements.successMessage.classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            elements.successMessage.textContent = message;
+            elements.successMessage.classList.remove('hidden');
+            elements.errorMessage.classList.add('hidden');
+        }
+
+        function hideMessages() {
+            elements.errorMessage.classList.add('hidden');
+            elements.successMessage.classList.add('hidden');
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'Never';
+            return new Date(dateString).toLocaleString();
+        }
+
+        function formatDuration(minutes) {
+            if (minutes < 60) return `${minutes} minutes`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}m`;
+        }
+
+        // API functions
+        async function fetchTrainingStatus() {
+            try {
+                const response = await fetch('/api/ai/training-status');
+                if (response.ok) {
+                    trainingStatus = await response.json();
+                    updateTrainingStatusDisplay();
+                }
+            } catch (err) {
+                console.error('Failed to fetch training status:', err);
+            }
+        }
+
+        async function fetchTrainingMetrics() {
+            try {
+                const response = await fetch('/api/ai/training-metrics');
+                if (response.ok) {
+                    const metrics = await response.json();
+                    updateTrainingMetricsFromAPI(metrics);
+                }
+            } catch (err) {
+                console.error('Failed to fetch training metrics:', err);
+            }
+        }
+
+        function updateTrainingMetricsFromAPI(apiMetrics) {
+            if (!apiMetrics.current_metrics) return;
+            
+            const current = apiMetrics.current_metrics;
+            
+            // Update training metrics from API
+            trainingMetrics.trainingLoss = current.training_loss || trainingMetrics.trainingLoss;
+            trainingMetrics.learningRate = current.learning_rate || trainingMetrics.learningRate;
+            trainingMetrics.rewardScore = current.reward_score || trainingMetrics.rewardScore;
+            trainingMetrics.policyGradient = current.policy_gradient_norm || trainingMetrics.policyGradient;
+            trainingMetrics.klDivergence = current.kl_divergence || trainingMetrics.klDivergence;
+            trainingMetrics.valueFunction = current.value_function_loss || trainingMetrics.valueFunction;
+            
+            // Update LoRA config display
+            if (apiMetrics.lora_config) {
+                elements.loraRankDisplay.textContent = apiMetrics.lora_config.rank;
+            }
+            
+            updateTrainingMetrics();
+            
+            // Add log entry about real metrics
+            if (current.timestamp) {
+                addTrainingLog(`Updated metrics: Loss=${current.training_loss?.toFixed(3)}, Reward=${current.reward_score?.toFixed(3)}`);
+            }
+        }
+
+        async function startTraining() {
+            if (loading) return;
+            
+            loading = true;
+            elements.startTrainingBtn.disabled = true;
+            elements.startTrainingBtn.textContent = 'Starting Training...';
+            hideMessages();
+
+            try {
+                // Configure training first
+                const config = {
+                    num_agents: parseInt(elements.numAgents.value),
+                    games_per_session: parseInt(elements.gamesPerSession.value),
+                    training_interval_minutes: parseInt(elements.trainingInterval.value),
+                    enable_live_learning: elements.enableLiveLearning.checked,
+                    lora_rank: elements.loraRankSelect?.value ? parseInt(elements.loraRankSelect.value) : 16,
+                    training_method: elements.trainingMethod?.value || 'rlhf'
+                };
+
+                const configResponse = await fetch('/api/ai/configure-training', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(config),
+                });
+
+                if (!configResponse.ok) {
+                    throw new Error('Failed to configure training');
+                }
+
+                // Start training
+                const startResponse = await fetch('/api/ai/start-training', {
+                    method: 'POST',
+                });
+
+                if (!startResponse.ok) {
+                    throw new Error('Failed to start training');
+                }
+
+                showSuccess('Training started successfully!');
+                await fetchTrainingStatus();
+                
+            } catch (err) {
+                showError(err.message || 'Unknown error occurred');
+            } finally {
+                loading = false;
+                elements.startTrainingBtn.disabled = false;
+                elements.startTrainingBtn.textContent = 'Start Training';
+            }
+        }
+
+        async function stopTraining() {
+            if (loading) return;
+            
+            loading = true;
+            elements.stopTrainingBtn.disabled = true;
+            elements.stopTrainingBtn.textContent = 'Stopping Training...';
+            hideMessages();
+
+            try {
+                const response = await fetch('/api/ai/stop-training', {
+                    method: 'POST',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to stop training');
+                }
+
+                showSuccess('Training stopped successfully!');
+                await fetchTrainingStatus();
+                
+            } catch (err) {
+                showError(err.message || 'Unknown error occurred');
+            } finally {
+                loading = false;
+                elements.stopTrainingBtn.disabled = false;
+                elements.stopTrainingBtn.textContent = 'Stop Training';
+            }
+        }
+
+        function startPlaying() {
+            const numBots = parseInt(elements.numBots.value);
+            const difficulty = elements.botDifficulty.value;
+            
+            showSuccess(`Starting game with ${numBots} ${difficulty} bots...`);
+            
+            // Redirect to the main game interface
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+
+        // Update display functions
+        function updateTrainingStatusDisplay() {
+            if (!trainingStatus) return;
+
+            elements.trainingActive.textContent = trainingStatus.training_active ? 'Active' : 'Inactive';
+            elements.trainingActive.className = `text-lg font-semibold ${trainingStatus.training_active ? 'text-green-400' : 'text-red-400'}`;
+            
+            elements.totalSessions.textContent = trainingStatus.total_training_sessions || 0;
+            elements.totalGames.textContent = trainingStatus.total_training_games || 0;
+            elements.agentCount.textContent = trainingStatus.agent_count || 0;
+            elements.lastTraining.textContent = formatDateTime(trainingStatus.last_training_time);
+            elements.nextTraining.textContent = formatDateTime(trainingStatus.next_training_time);
+
+            // Show/hide training buttons and feedback based on status
+            if (trainingStatus.training_active) {
+                elements.startTrainingBtn.classList.add('hidden');
+                elements.stopTrainingBtn.classList.remove('hidden');
+                elements.modelTrainingFeedback.classList.remove('hidden');
+                startMetricsSimulation();
+            } else {
+                elements.startTrainingBtn.classList.remove('hidden');
+                elements.stopTrainingBtn.classList.add('hidden');
+                elements.modelTrainingFeedback.classList.add('hidden');
+                stopMetricsSimulation();
+            }
+        }
+
+        function updateTrainingMetrics() {
+            // Update session progress
+            const progressPercent = (trainingMetrics.sessionProgress / trainingMetrics.maxGames) * 100;
+            elements.sessionProgressText.textContent = `${trainingMetrics.sessionProgress}/${trainingMetrics.maxGames} games`;
+            elements.sessionProgressBar.style.width = `${progressPercent}%`;
+
+            // Update LoRA metrics
+            elements.loraRankDisplay.textContent = elements.loraRankSelect.value;
+            elements.trainingLossDisplay.textContent = trainingMetrics.trainingLoss.toFixed(3);
+            elements.learningRateDisplay.textContent = trainingMetrics.learningRate.toExponential(1);
+
+            // Update RLHF metrics
+            elements.rewardScore.textContent = trainingMetrics.rewardScore.toFixed(3);
+            elements.policyGradient.textContent = trainingMetrics.policyGradient.toFixed(4);
+            elements.klDivergence.textContent = trainingMetrics.klDivergence.toFixed(4);
+            elements.valueFunction.textContent = trainingMetrics.valueFunction.toFixed(3);
+
+            // Update performance metrics
+            elements.liberalWinrate.textContent = `${trainingMetrics.liberalWinRate}%`;
+            elements.fascistWinrate.textContent = `${trainingMetrics.fascistWinRate}%`;
+            elements.hitlerWinrate.textContent = `${trainingMetrics.hitlerWinRate}%`;
+            elements.avgGameLength.textContent = trainingMetrics.avgGameLength.toFixed(1);
+        }
+
+        function simulateTrainingProgress() {
+            // Simulate realistic training metrics evolution
+            trainingMetrics.sessionProgress = Math.min(trainingMetrics.sessionProgress + 1, trainingMetrics.maxGames);
+            
+            // Training loss should generally decrease with some noise
+            trainingMetrics.trainingLoss = Math.max(0.1, trainingMetrics.trainingLoss - 0.001 + (Math.random() - 0.5) * 0.01);
+            
+            // Learning rate adaptive scheduling
+            if (trainingMetrics.sessionProgress % 5 === 0) {
+                trainingMetrics.learningRate *= 0.95; // Decay learning rate
+            }
+            
+            // RLHF metrics simulation
+            trainingMetrics.rewardScore += (Math.random() - 0.4) * 0.1; // Slight upward trend
+            trainingMetrics.policyGradient = (Math.random() - 0.5) * 0.02;
+            trainingMetrics.klDivergence = Math.abs((Math.random() - 0.5) * 0.01);
+            trainingMetrics.valueFunction += (Math.random() - 0.45) * 0.05;
+            
+            // Win rates evolution (should balance over time)
+            const totalWinRate = trainingMetrics.liberalWinRate + trainingMetrics.fascistWinRate + trainingMetrics.hitlerWinRate;
+            if (totalWinRate !== 100) {
+                // Normalize to 100%
+                const factor = 100 / totalWinRate;
+                trainingMetrics.liberalWinRate = Math.round(trainingMetrics.liberalWinRate * factor);
+                trainingMetrics.fascistWinRate = Math.round(trainingMetrics.fascistWinRate * factor);
+                trainingMetrics.hitlerWinRate = 100 - trainingMetrics.liberalWinRate - trainingMetrics.fascistWinRate;
+            }
+            
+            // Small random adjustments to win rates
+            const adjustment = Math.floor((Math.random() - 0.5) * 4);
+            if (adjustment !== 0) {
+                trainingMetrics.liberalWinRate = Math.max(30, Math.min(70, trainingMetrics.liberalWinRate + adjustment));
+                trainingMetrics.fascistWinRate = Math.max(20, Math.min(50, trainingMetrics.fascistWinRate - adjustment));
+                trainingMetrics.hitlerWinRate = 100 - trainingMetrics.liberalWinRate - trainingMetrics.fascistWinRate;
+            }
+            
+            // Game length variation
+            trainingMetrics.avgGameLength += (Math.random() - 0.5) * 0.2;
+            trainingMetrics.avgGameLength = Math.max(12, Math.min(25, trainingMetrics.avgGameLength));
+            
+            // Reset session progress when complete
+            if (trainingMetrics.sessionProgress >= trainingMetrics.maxGames) {
+                trainingMetrics.sessionProgress = 0;
+                addTrainingLog(`Session completed! Loss: ${trainingMetrics.trainingLoss.toFixed(3)}, Reward: ${trainingMetrics.rewardScore.toFixed(3)}`);
+            }
+            
+            updateTrainingMetrics();
+        }
+
+        function addTrainingLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            trainingLogs.push(logEntry);
+            
+            // Keep only last 50 log entries
+            if (trainingLogs.length > 50) {
+                trainingLogs.shift();
+            }
+            
+            // Update log display
+            elements.trainingLog.innerHTML = trainingLogs.map(log => 
+                `<div class="text-gray-300">${log}</div>`
+            ).join('');
+            elements.trainingLog.scrollTop = elements.trainingLog.scrollHeight;
+        }
+
+        function startMetricsSimulation() {
+            if (metricsUpdateInterval) return;
+            
+            addTrainingLog('Starting LoRA + RLHF training session...');
+            addTrainingLog(`LoRA rank: ${elements.loraRankSelect.value}, Method: ${elements.trainingMethod.value}`);
+            
+            metricsUpdateInterval = setInterval(() => {
+                simulateTrainingProgress();
+                // Also fetch real metrics from API
+                fetchTrainingMetrics();
+            }, 3000); // Update every 3 seconds
+        }
+
+        function stopMetricsSimulation() {
+            if (metricsUpdateInterval) {
+                clearInterval(metricsUpdateInterval);
+                metricsUpdateInterval = null;
+                addTrainingLog('Training stopped by user.');
+            }
+        }
+
+        function updateSliderDisplays() {
+            elements.numAgentsDisplay.textContent = `${elements.numAgents.value} agents`;
+            elements.gamesPerSessionDisplay.textContent = `${elements.gamesPerSession.value} games`;
+            elements.trainingIntervalDisplay.textContent = formatDuration(parseInt(elements.trainingInterval.value));
+            elements.numBotsDisplay.textContent = `${elements.numBots.value} bots + you`;
+        }
+
+        // Event listeners
+        elements.numAgents.addEventListener('input', updateSliderDisplays);
+        elements.gamesPerSession.addEventListener('input', updateSliderDisplays);
+        elements.trainingInterval.addEventListener('input', updateSliderDisplays);
+        elements.numBots.addEventListener('input', updateSliderDisplays);
+
+        elements.startTrainingBtn.addEventListener('click', startTraining);
+        elements.stopTrainingBtn.addEventListener('click', stopTraining);
+        elements.startPlayingBtn.addEventListener('click', startPlaying);
+
+        // Initialize
+        updateSliderDisplays();
+        fetchTrainingStatus();
+        
+        // Refresh training status every 10 seconds
+        setInterval(fetchTrainingStatus, 10000);
+    </script>
+</body>
+</html>

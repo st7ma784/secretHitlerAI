@@ -1,0 +1,184 @@
+/* Custom CSS for Secret Hitler AI Documentation */
+
+/* Brand colors */
+:root {
+    --sh-primary: #2c3e50;
+    --sh-secondary: #e74c3c;
+    --sh-accent: #f39c12;
+    --sh-success: #27ae60;
+    --sh-info: #3498db;
+    --sh-warning: #f39c12;
+    --sh-danger: #e74c3c;
+}
+
+/* Header customization */
+.wy-nav-top {
+    background: var(--sh-primary) !important;
+}
+
+/* Sidebar customization */
+.wy-nav-side {
+    background: var(--sh-primary) !important;
+}
+
+.wy-menu-vertical a {
+    color: #ecf0f1 !important;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: var(--sh-secondary) !important;
+}
+
+/* Code blocks */
+.highlight {
+    background: #2c3e50 !important;
+    border-radius: 6px;
+    padding: 1em;
+    margin: 1em 0;
+}
+
+.highlight pre {
+    color: #ecf0f1 !important;
+    background: transparent !important;
+}
+
+/* Admonitions */
+.admonition.note {
+    border-left: 4px solid var(--sh-info);
+}
+
+.admonition.warning {
+    border-left: 4px solid var(--sh-warning);
+}
+
+.admonition.danger {
+    border-left: 4px solid var(--sh-danger);
+}
+
+.admonition.tip {
+    border-left: 4px solid var(--sh-success);
+}
+
+/* Tables */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal !important;
+}
+
+/* API documentation styling */
+.py.class > dt {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--sh-primary);
+    padding: 0.5em;
+    margin-top: 1em;
+}
+
+.py.method > dt {
+    background-color: #f1f3f4;
+    border-left: 4px solid var(--sh-info);
+    padding: 0.3em;
+}
+
+.py.function > dt {
+    background-color: #f1f3f4;
+    border-left: 4px solid var(--sh-success);
+    padding: 0.3em;
+}
+
+/* Custom badges */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    margin: 0.1em;
+}
+
+.badge-primary {
+    color: #fff;
+    background-color: var(--sh-primary);
+}
+
+.badge-secondary {
+    color: #fff;
+    background-color: var(--sh-secondary);
+}
+
+.badge-success {
+    color: #fff;
+    background-color: var(--sh-success);
+}
+
+.badge-info {
+    color: #fff;
+    background-color: var(--sh-info);
+}
+
+.badge-warning {
+    color: #212529;
+    background-color: var(--sh-warning);
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: var(--sh-danger);
+}
+
+/* Feature grid */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background: #f8f9fa;
+}
+
+.feature-card h3 {
+    color: var(--sh-primary);
+    margin-top: 0;
+}
+
+/* Architecture diagrams */
+.architecture-diagram {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.architecture-diagram img {
+    max-width: 100%;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Code examples */
+.code-example {
+    background: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.code-example h4 {
+    margin-top: 0;
+    color: var(--sh-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+}
