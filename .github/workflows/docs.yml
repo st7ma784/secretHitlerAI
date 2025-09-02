@@ -7,11 +7,6 @@ on:
       - 'docs/**'
       - 'backend/**'
       - '.github/workflows/docs.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'docs/**'
-      - 'backend/**'
   workflow_dispatch:
 
 permissions:
@@ -142,29 +137,3 @@ jobs:
         # Stop server
         kill $SERVER_PID
 
-  docs-preview:
-    runs-on: ubuntu-latest
-    needs: build-docs
-    if: github.event_name == 'pull_request'
-    
-    steps:
-    - name: Download documentation artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: sphinx-docs
-        path: docs-preview/
-    
-    - name: Deploy to Netlify (Preview)
-      uses: nwtgck/actions-netlify@v2.0
-      with:
-        publish-dir: './docs-preview'
-        production-branch: main
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        deploy-message: "Deploy from GitHub Actions"
-        enable-pull-request-comment: true
-        enable-commit-comment: false
-        overwrites-pull-request-comment: true
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      if: env.NETLIFY_AUTH_TOKEN != null && env.NETLIFY_SITE_ID != null
